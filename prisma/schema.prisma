@@ -1,0 +1,140 @@
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["postgresqlExtensions"]
+}
+
+datasource db {
+  provider   = "postgres"
+  url        = env("DATABASE_URL")
+  extensions = [postgis, postgis_topology]
+  // shadowDatabaseUrl = env("SHADOW_DATABASE_URL")
+}
+
+model User {
+  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  email     String   @unique
+  password  String
+  username  String   @unique
+  firstName String
+  lastName  String
+  phone     String
+  avatar    String?
+  identity  Boolean
+  createdAt DateTime @default(now())
+  addressId String?  @db.Uuid
+  address   Address? @relation(fields: [addressId], references: [id])
+  likes     like[]
+}
+
+model Propertie {
+  id               String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  title            String           @db.VarChar(50)
+  description      String           @db.VarChar(255)
+  energyClass      Int
+  ges              Int
+  createdAt        DateTime         @default(now())
+  images           Image[]
+  addressId        String           @db.Uuid
+  priceId          String           @db.Uuid
+  address          Address          @relation(fields: [addressId], references: [id])
+  price            Price            @relation(fields: [priceId], references: [id])
+  houseDetail      HouseDetail?
+  appartmentDetail ApartmentDetail?
+  landDetail       LandDetail?
+  parkingDetail    ParkingDetail?
+  otherDetail      OtherDetail?
+  likes            like[]
+}
+
+model HouseDetail {
+  id           String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  furnished    Boolean
+  livingArea   Int
+  totalArea    Int
+  rooms        Int
+  floorsNumber Int
+  floor        Int
+  balcony      Boolean
+  terrace      Boolean
+  garden       Boolean
+  parking      Int
+  propertie    Propertie @relation(fields: [id], references: [id])
+}
+
+model ApartmentDetail {
+  id         String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  furnished  Boolean
+  livingArea Int
+  rooms      Int
+  floor      Int
+  lift       Boolean
+  balcony    Boolean
+  terrace    Boolean
+  garden     Boolean
+  parking    Int
+  propertie  Propertie @relation(fields: [id], references: [id])
+}
+
+model LandDetail {
+  id        String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  totalArea Int
+  propertie Propertie @relation(fields: [id], references: [id])
+}
+
+model ParkingDetail {
+  id        String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  parking   Int
+  propertie Propertie @relation(fields: [id], references: [id])
+}
+
+model OtherDetail {
+  id           String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  furnished    Boolean
+  livingArea   Int
+  totalArea    Int
+  rooms        Int
+  lift         Boolean
+  floorsNumber Int
+  floor        Int
+  balcony      Boolean
+  terrace      Boolean
+  garden       Boolean
+  parking      Int
+  propertie    Propertie @relation(fields: [id], references: [id])
+}
+
+model Address {
+  id         String                               @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  street     String
+  city       String
+  postalCode String
+  country    String
+  users      User[]
+  properties Propertie[]
+  // the geometry column itself
+  coordinate Unsupported("geography(Point,4326)")
+
+  // the index for that column --> https://freddydumont.com/blog/prisma-postgis
+  @@index([coordinate], name: "location_idx", type: Gist)
+}
+
+model Price {
+  id         String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  price      Int
+  properties Propertie[]
+}
+
+model Image {
+  id          Int       @id @default(autoincrement())
+  url         String
+  propertieId String    @db.Uuid
+  propertie   Propertie @relation(fields: [propertieId], references: [id])
+}
+
+model like {
+  id          Int       @id @default(autoincrement())
+  userId      String    @db.Uuid
+  propertieId String    @db.Uuid
+  user        User      @relation(fields: [userId], references: [id])
+  propertie   Propertie @relation(fields: [propertieId], references: [id])
+}
