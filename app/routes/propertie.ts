@@ -1,22 +1,22 @@
 import express from 'express';
 import { body, validationResult } from 'express-validator';
-import * as userController from '../controllers/propertie';
+import * as propertieController from '../controllers/propertie';
+import { auth } from '../middlewares/authMiddleware';
 
 const router = express.Router();
 
-// Route pour obtenir la liste des utilisateurs
-router.get('/', userController.getAllProperties);
+router.get('/', auth, propertieController.getAllProperties);
 
-// Route pour créer un nouvel utilisateur
-router.post('/', body('price').isNumeric().trim(), userController.createPropertie);
+router.post(
+    '/', 
+    body('price').isNumeric().trim(), 
+    propertieController.createPropertie
+);
 
-// Route pour obtenir un utilisateur spécifique par son ID
-router.get('/:id', userController.getPropertieById);
+router.get('/:id', propertieController.getPropertieById);
 
-// Route pour mettre à jour un utilisateur
-router.put('/:id', userController.udpatePropertie);
+router.put('/:id', propertieController.udpatePropertie);
 
-// Route pour supprimer un utilisateur
-router.delete('/:id', userController.deletePropertie);
+router.delete('/:id', propertieController.deletePropertie);
 
 export default router;

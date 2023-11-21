@@ -7,22 +7,23 @@ datasource db {
   provider   = "postgres"
   url        = env("DATABASE_URL")
   extensions = [postgis, postgis_topology]
-  // shadowDatabaseUrl = env("SHADOW_DATABASE_URL")
 }
 
 model User {
-  id        String   @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  email     String   @unique
+  id        String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  email     String    @unique
   password  String
-  username  String   @unique
-  firstName String
-  lastName  String
-  phone     String
+  username  String?   @unique
+  firstName String?
+  lastName  String?
+  phone     String?
   avatar    String?
-  identity  Boolean
-  createdAt DateTime @default(now())
-  addressId String?  @db.Uuid
-  address   Address? @relation(fields: [addressId], references: [id])
+  identity  Boolean   @default(false)
+  // refreshTokens RefreshToken[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime? @updatedAt
+  addressId String?   @db.Uuid
+  address   Address?  @relation(fields: [addressId], references: [id])
   likes     like[]
 }
 
@@ -33,6 +34,7 @@ model Propertie {
   energyClass      Int
   ges              Int
   createdAt        DateTime         @default(now())
+  updatedAt        DateTime?        @updatedAt
   images           Image[]
   addressId        String           @db.Uuid
   priceId          String           @db.Uuid
@@ -138,3 +140,13 @@ model like {
   user        User      @relation(fields: [userId], references: [id])
   propertie   Propertie @relation(fields: [propertieId], references: [id])
 }
+
+// model RefreshToken {
+//   id          String   @id @unique @default(uuid())
+//   hashedToken String
+//   userId      String
+//   User        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+//   revoked     Boolean  @default(false)
+//   createdAt   DateTime @default(now())
+//   updatedAt   DateTime @updatedAt
+// }

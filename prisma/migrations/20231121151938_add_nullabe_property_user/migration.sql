@@ -1,0 +1,10 @@
+-- AlterTable
+ALTER TABLE "Propertie" ADD COLUMN     "updatedAt" TIMESTAMP(3);
+
+-- AlterTable
+ALTER TABLE "User" ADD COLUMN     "updatedAt" TIMESTAMP(3),
+ALTER COLUMN "firstName" DROP NOT NULL,
+ALTER COLUMN "lastName" DROP NOT NULL,
+ALTER COLUMN "phone" DROP NOT NULL,
+ALTER COLUMN "username" DROP NOT NULL,
+ALTER COLUMN "identity" SET DEFAULT false;
