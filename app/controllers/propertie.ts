@@ -1,10 +1,9 @@
 import { Request, Response, Express } from 'express';
+import { WithAuthProp, LooseAuthProp } from '@clerk/clerk-sdk-node';
 
-export async function getAllProperties({
-    prisma,
-}: Request, {
-    status,
-}: Response) {
+export async function getAllProperties(req: WithAuthProp<Request>, res: Response) {
+    const { prisma, auth } = req;
+    const { status, } = res;
     try {
         const properties = await prisma.propertie.findMany();
         status(200).json(properties);

@@ -1,11 +1,21 @@
 import express from 'express';
 import { body, validationResult } from 'express-validator';
 import * as propertieController from '../controllers/propertie';
+import {
+    ClerkExpressWithAuth,
+    LooseAuthProp,
+    WithAuthProp,
+  } from '@clerk/clerk-sdk-node';
 import { auth } from '../middlewares/authMiddleware';
 
 const router = express.Router();
 
-router.get('/', auth, propertieController.getAllProperties);
+// router.get('/', ClerkExpressWithAuth(), (req: WithAuthProp<Request>, res: Response) => {
+//     propertieController.getAllProperties(req, res);
+//   });
+
+router.get('/', ClerkExpressWithAuth(), propertieController.getAllProperties
+);
 
 router.post(
     '/', 

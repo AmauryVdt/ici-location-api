@@ -50,11 +50,3 @@ export async function register(req: Request, res: Response) {
       res.status(500).send(getErrorMessage(error));
     }
   }
-
-// export async function refreshtoken(req: Request, res: Response) {
-//     try {
-//         res.status(200).json('login');
-//     } catch (error: any) {
-//         res.status(500).send(error.message);
-//     }
-// }

@@ -19,7 +19,6 @@ model User {
   phone     String?
   avatar    String?
   identity  Boolean   @default(false)
-  // refreshTokens RefreshToken[]
   createdAt DateTime  @default(now())
   updatedAt DateTime? @updatedAt
   addressId String?   @db.Uuid
@@ -140,13 +139,3 @@ model like {
   user        User      @relation(fields: [userId], references: [id])
   propertie   Propertie @relation(fields: [propertieId], references: [id])
 }
-
-// model RefreshToken {
-//   id          String   @id @unique @default(uuid())
-//   hashedToken String
-//   userId      String
-//   User        User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-//   revoked     Boolean  @default(false)
-//   createdAt   DateTime @default(now())
-//   updatedAt   DateTime @updatedAt
-// }
