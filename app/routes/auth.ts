@@ -18,12 +18,4 @@ router.post(
     authController.register
 );
 
-router.post(
-    '/webhook',
-    check('svix-id').notEmpty(),
-    check('timestamp').notEmpty(),
-    check('svix-signature').notEmpty(),
-    authController.webhook
-);
-
 export default router;

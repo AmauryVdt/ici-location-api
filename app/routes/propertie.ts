@@ -10,12 +10,7 @@ import { auth } from '../middlewares/authMiddleware';
 
 const router = express.Router();
 
-// router.get('/', ClerkExpressWithAuth(), (req: WithAuthProp<Request>, res: Response) => {
-//     propertieController.getAllProperties(req, res);
-//   });
-
-router.get('/', ClerkExpressWithAuth(), propertieController.getAllProperties
-);
+router.get('/', ClerkExpressWithAuth(), propertieController.getAllProperties);
 
 router.post(
     '/', 
