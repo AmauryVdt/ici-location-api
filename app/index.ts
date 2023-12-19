@@ -3,7 +3,7 @@ import dotenv from 'dotenv';
 import express, { Express, Request, Response } from 'express';
 import { prismaMiddleware } from './middlewares/prismaMiddleware';
 import userRoutes from './routes/user';
-import authRoutes from './routes/auth';
+// import authRoutes from './routes/auth';
 import webhookRoutes from './routes/webhook';
 
 dotenv.config();
@@ -16,7 +16,7 @@ app.use(bodyParser.json({ limit: '5mb' }));
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(prismaMiddleware);
 app.use('/user', userRoutes);
-app.use('/auth', authRoutes);
+// app.use('/auth', authRoutes);
 app.use('/webhook', webhookRoutes);
 
 app.get('/', async (req: Request, res: Response) => {

@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { Webhook } from 'svix'
+import { createUser, updateUser, deleteUser, UserProps } from '../services/user';
 
 type WebhookEvent = {
     id: string;
@@ -11,8 +12,6 @@ export async function webhook(req: Request, res: Response) {
 
 // You can find this in the Clerk Dashboard -> Webhooks -> choose the webhook
 const WEBHOOK_SECRET = process.env.WEBHOOK_SECRET
-
-console.log('Webhook secret:', WEBHOOK_SECRET)
 
 if (!WEBHOOK_SECRET) {
     throw new Error('Please add WEBHOOK_SECRET from Clerk Dashboard to .env or .env.local')
@@ -54,9 +53,82 @@ try {
 // Get the ID and type
 const { id } = evt.data;
 const eventType = evt.type;
+const { data } = payload;
 
-console.log(`Webhook with and ID of ${id} and type of ${eventType}`)
-console.log('Webhook body:', body)
+console.log('Webhook event type:', eventType)
+
+if (eventType === 'user.created') {
+
+    const userProps: UserProps = {
+        id: data.id,
+        username: data.username,
+        email: data.email_addresses[0].email_address,
+    }
+
+    try {
+        const user = await createUser(userProps, req);
+        if (process.env.ENVRIONNEMENT === 'DEV') {
+            console.log('user created: ', user)
+        } else {
+            res.status(201).json(user);
+        }
+    }
+    catch (error) {
+        if (process.env.ENVRIONNEMENT === 'DEV') {
+            console.error(error)
+        } else {
+            res.status(500).json({ error: 'Failed to create user' });
+        }
+    }
+}
+else if (eventType === 'user.updated') {
+    
+    const userProps: UserProps = {
+        id: data.id,
+        username: data.username,
+        email: data.email_addresses[0].email_address,
+    }
+
+    try {
+        const user = await updateUser(userProps, req);
+        if (process.env.ENVRIONNEMENT === 'DEV') {
+            console.log('user updated: ', user)
+        } else {
+            res.status(201).json(user);
+        }
+    }
+    catch (error) {
+        if (process.env.ENVRIONNEMENT === 'DEV') {
+            console.error(error)
+        } else {
+            res.status(500).json({ error: 'Failed to create user' });
+        }
+    }
+}
+else if (eventType === 'user.deleted') {
+
+    try {
+        const user = await deleteUser(data.id, req);
+        if (process.env.ENVRIONNEMENT === 'DEV') {
+            console.log('user created: ', user)
+        } else {
+            res.status(201).json(user);
+        }
+    }
+    catch (error) {
+        if (process.env.ENVRIONNEMENT === 'DEV') {
+            console.error(error)
+        } else {
+            res.status(500).json({ error: 'Failed to create user' });
+        }
+    }
+}
+else {
+    res.status(400).send('Error occured -- unknown event type');
+}
+
+// console.log(`Webhook with and ID of ${id} and type of ${eventType}`)
+// console.log('Webhook body:', body)
 
 return res.status(200).send('Webhook received');
 }

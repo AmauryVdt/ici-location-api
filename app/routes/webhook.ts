@@ -6,9 +6,9 @@ const router = express.Router();
 
 router.post(
     '/user',
-    // check('svix-id').notEmpty(),
-    // check('timestamp').notEmpty(),
-    // check('svix-signature').notEmpty(),
+    check('svix-id').notEmpty(),
+    check('timestamp').notEmpty(),
+    check('svix-signature').notEmpty(),
     webhookController.webhook
 );
 
