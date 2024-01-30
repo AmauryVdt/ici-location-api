@@ -28,8 +28,3 @@ CMD [ "node", "dist/index.js" ]
 
 # # Copier les scripts SQL dans le conteneur
 # COPY ./initdb-postgis.sh /docker-entrypoint-initdb.d/
-
-
-# docker run --name db -e POSTGRES_PASSWORD=crampte -e POSTGRES_USER=admin -e POSTGRES_DB=icilocation -p 5432:5432 -v ./postgres_data:/var/lib/postgresql/data -d postgis/postgis:16-3.4
-
-# docker run --name db_shadow -e POSTGRES_PASSWORD=crampte -e POSTGRES_USER=admin -e POSTGRES_DB=icilocationshadow -p 5433:5432 -v ./postgres_data_shadow:/var/lib/postgresql/data -d postgis/postgis:16-3.4

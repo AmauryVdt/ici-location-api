@@ -1,8 +1,9 @@
-import { Request, Response, Express } from 'express';
-import { WithAuthProp, LooseAuthProp } from '@clerk/clerk-sdk-node';
+import { Request, Response } from 'express';
+import { createPropertieService } from '../services/propertie';
+import { validationResult } from 'express-validator';
 
-export async function getAllProperties(req: WithAuthProp<Request>, res: Response) {
-    const { prisma, auth } = req;
+export async function getAllProperties(req: Request, res: Response) {
+    const { prisma } = req;
     const { status, } = res;
     try {
         const properties = await prisma.propertie.findMany();
@@ -12,20 +13,37 @@ export async function getAllProperties(req: WithAuthProp<Request>, res: Response
     }
 }
 
-export async function createPropertie({
-    prisma, body
-}: Request, {
-    status,
-}: Response) {
+export async function createPropertie(req: Request, res: Response) {
+    const { prisma, auth } = req;
+    const { status, } = res;
+    const result = validationResult(req);
+
+    if (!result.isEmpty()) {
+        // res.status(422).send('Bad request');
+        res.status(422).json({'Bad request': result.array()});
+        return;
+    }
+
+    if (!auth.userId) {
+        res.status(401).send('Unauthorized');
+        return;
+    }
+    else {
+        if (!(await prisma.user.findUnique({ where: { id: auth.userId } }))) {
+            res.status(401).send('Unauthorized');
+            return;
+        }
+    }
+
     try {
-        const propertie = await prisma.propertie.create({
-            data: body,
-        });
-        status(201).json(propertie);
+        const propertie = await createPropertieService(req, auth.userId)
+        res.status(201).json(propertie.id);
     } catch (error: any) {
-        status(500).send(error.message);
+        console.error(error);
+        res.status(500).send('An error occured');
     }
 }
+
 
 export async function getPropertieById({
     prisma, params

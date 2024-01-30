@@ -57,9 +57,9 @@ export async function deleteUser(id: string, req: Request) {
     }
 }
 
-export async function getUserById(id: string) {
+export async function getUserById(id: string, req: Request) {
     try {
-        const user = await prisma.user.findUnique({
+        const user = await req.prisma.user.findUnique({
             where: {
                 id,
             },

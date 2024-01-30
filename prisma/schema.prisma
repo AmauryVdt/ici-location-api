@@ -10,40 +10,43 @@ datasource db {
 }
 
 model User {
-  id        String    @id
-  email     String    @unique
-  username  String    @unique
-  firstName String?
-  lastName  String?
-  phone     String?
-  avatar    String?
-  identity  Boolean   @default(false)
-  createdAt DateTime  @default(now())
-  updatedAt DateTime? @updatedAt
-  addressId String?   @db.Uuid
-  address   Address?  @relation(fields: [addressId], references: [id])
-  likes     like[]
+  id         String      @id
+  email      String      @unique
+  username   String      @unique
+  firstName  String?
+  lastName   String?
+  phone      String?
+  avatar     String?
+  identity   Boolean     @default(false)
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime?   @updatedAt
+  addressId  String?     @db.Uuid
+  address    Address?    @relation(fields: [addressId], references: [id])
+  properties Propertie[]
+  likes      Like[]
 }
 
 model Propertie {
-  id               String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  title            String           @db.VarChar(50)
-  description      String           @db.VarChar(255)
-  energyClass      Int
-  ges              Int
-  createdAt        DateTime         @default(now())
-  updatedAt        DateTime?        @updatedAt
-  images           Image[]
-  addressId        String           @db.Uuid
-  priceId          String           @db.Uuid
-  address          Address          @relation(fields: [addressId], references: [id])
-  price            Price            @relation(fields: [priceId], references: [id])
-  houseDetail      HouseDetail?
-  appartmentDetail ApartmentDetail?
-  landDetail       LandDetail?
-  parkingDetail    ParkingDetail?
-  otherDetail      OtherDetail?
-  likes            like[]
+  id              String           @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  title           String           @db.VarChar(50)
+  description     String           @db.VarChar(500)
+  energyClass     String           @db.VarChar(5)
+  ges             String           @db.VarChar(5)
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime?        @updatedAt
+  images          Image[]
+  addressId       String           @unique @db.Uuid
+  address         Address          @relation(fields: [addressId], references: [id])
+  priceId         String           @unique @db.Uuid
+  price           Price            @relation(fields: [priceId], references: [id])
+  houseDetail     HouseDetail?
+  apartmentDetail ApartmentDetail?
+  landDetail      LandDetail?
+  parkingDetail   ParkingDetail?
+  otherDetail     OtherDetail?
+  userId          String
+  user            User             @relation(fields: [userId], references: [id])
+  likes           Like[]
 }
 
 model HouseDetail {
@@ -53,7 +56,6 @@ model HouseDetail {
   totalArea    Int
   rooms        Int
   floorsNumber Int
-  floor        Int
   balcony      Boolean
   terrace      Boolean
   garden       Boolean
@@ -62,17 +64,18 @@ model HouseDetail {
 }
 
 model ApartmentDetail {
-  id         String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  furnished  Boolean
-  livingArea Int
-  rooms      Int
-  floor      Int
-  lift       Boolean
-  balcony    Boolean
-  terrace    Boolean
-  garden     Boolean
-  parking    Int
-  propertie  Propertie @relation(fields: [id], references: [id])
+  id           String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  furnished    Boolean
+  livingArea   Int
+  rooms        Int
+  floorsNumber Int
+  floor        Int
+  lift         Boolean
+  balcony      Boolean
+  terrace      Boolean
+  garden       Boolean
+  parking      Int
+  propertie    Propertie @relation(fields: [id], references: [id])
 }
 
 model LandDetail {
@@ -82,9 +85,10 @@ model LandDetail {
 }
 
 model ParkingDetail {
-  id        String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  parking   Int
-  propertie Propertie @relation(fields: [id], references: [id])
+  id         String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  parking    Int
+  propertyId String    @unique @db.Uuid
+  propertie  Propertie @relation(fields: [propertyId], references: [id])
 }
 
 model OtherDetail {
@@ -104,18 +108,21 @@ model OtherDetail {
 }
 
 model Address {
-  id         String                               @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
-  street     String
-  city       String
-  postalCode String
-  country    String
+  id         String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name       String
+  // street     String
+  // city       String
+  // postalCode String
+  // country    String
   users      User[]
   properties Propertie[]
   // the geometry column itself
-  coordinate Unsupported("geography(Point,4326)")
+  // coordinate Unsupported("geography(Point,4326)")
 
   // the index for that column --> https://freddydumont.com/blog/prisma-postgis
-  @@index([coordinate], name: "location_idx", type: Gist)
+  // @@index([coordinate], name: "location_idx", type: Gist)
+
+  // pour utiliser les fonctions postgis il faut faire des prisma.$queryRaw (des requètes brutes)
 }
 
 model Price {
@@ -125,16 +132,18 @@ model Price {
 }
 
 model Image {
-  id          Int       @id @default(autoincrement())
+  id          String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   url         String
   propertieId String    @db.Uuid
   propertie   Propertie @relation(fields: [propertieId], references: [id])
 }
 
-model like {
+model Like {
   id          Int       @id @default(autoincrement())
   userId      String
   propertieId String    @db.Uuid
   user        User      @relation(fields: [userId], references: [id])
   propertie   Propertie @relation(fields: [propertieId], references: [id])
+
+  @@unique([userId, propertieId])
 }
