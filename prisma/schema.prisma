@@ -37,9 +37,8 @@ model Propertie {
   images          Image[]
   addressId       String           @unique @db.Uuid
   address         Address          @relation(fields: [addressId], references: [id])
-  priceId         String           @unique @db.Uuid
-  price           Price            @relation(fields: [priceId], references: [id])
-  houseDetail     HouseDetail?
+  price           Price?
+  houseDetail     HouseDetail?     
   apartmentDetail ApartmentDetail?
   landDetail      LandDetail?
   parkingDetail   ParkingDetail?
@@ -60,7 +59,7 @@ model HouseDetail {
   terrace      Boolean
   garden       Boolean
   parking      Int
-  propertie    Propertie @relation(fields: [id], references: [id])
+  propertie    Propertie @relation(fields: [id], references: [id], onDelete: Cascade)
 }
 
 model ApartmentDetail {
@@ -75,20 +74,20 @@ model ApartmentDetail {
   terrace      Boolean
   garden       Boolean
   parking      Int
-  propertie    Propertie @relation(fields: [id], references: [id])
+  propertie    Propertie @relation(fields: [id], references: [id], onDelete: Cascade)
 }
 
 model LandDetail {
   id        String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   totalArea Int
-  propertie Propertie @relation(fields: [id], references: [id])
+  propertie Propertie @relation(fields: [id], references: [id], onDelete: Cascade)
 }
 
 model ParkingDetail {
   id         String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   parking    Int
   propertyId String    @unique @db.Uuid
-  propertie  Propertie @relation(fields: [propertyId], references: [id])
+  propertie  Propertie @relation(fields: [propertyId], references: [id], onDelete: Cascade)
 }
 
 model OtherDetail {
@@ -104,7 +103,7 @@ model OtherDetail {
   terrace      Boolean
   garden       Boolean
   parking      Int
-  propertie    Propertie @relation(fields: [id], references: [id])
+  propertie    Propertie @relation(fields: [id], references: [id], onDelete: Cascade)
 }
 
 model Address {
@@ -126,24 +125,24 @@ model Address {
 }
 
 model Price {
-  id         String      @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  id         String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   price      Int
-  properties Propertie[]
+  propertie  Propertie @relation(fields: [id], references: [id], onDelete: Cascade)
 }
 
 model Image {
   id          String    @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
   url         String
   propertieId String    @db.Uuid
-  propertie   Propertie @relation(fields: [propertieId], references: [id])
+  propertie   Propertie @relation(fields: [propertieId], references: [id], onDelete: Cascade)
 }
 
 model Like {
   id          Int       @id @default(autoincrement())
   userId      String
   propertieId String    @db.Uuid
-  user        User      @relation(fields: [userId], references: [id])
-  propertie   Propertie @relation(fields: [propertieId], references: [id])
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  propertie   Propertie @relation(fields: [propertieId], references: [id], onDelete: Cascade)
 
   @@unique([userId, propertieId])
 }

@@ -1,6 +1,6 @@
 import express from 'express';
-import { body } from 'express-validator';
-import * as propertieController from '../controllers/propertie';
+import { body, param, query } from 'express-validator';
+import * as propertieController from '../controllers/property';
 import {
     ClerkExpressWithAuth,
     LooseAuthProp,
@@ -37,10 +37,21 @@ router.post(
     propertieController.createPropertie
 );
 
+router.get(
+  '/user',
+  ClerkExpressWithAuth(),
+  propertieController.getPropertieByUserId
+  );
+
 router.get('/:id', propertieController.getPropertieById);
 
 router.put('/:id', propertieController.udpatePropertie);
 
-router.delete('/:id', propertieController.deletePropertie);
+router.delete(
+  '/:id',
+  ClerkExpressWithAuth(),
+  param('id').isString().trim().isUUID(),
+  propertieController.deletePropertie
+  );
 
 export default router;

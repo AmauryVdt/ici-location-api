@@ -6,7 +6,7 @@ import { prismaMiddleware } from './middlewares/prismaMiddleware';
 import userRoutes from './routes/user';
 import webhookRoutes from './routes/webhook';
 import presignedUrl from './routes/presignedUrl';
-import property from './routes/propertie';
+import property from './routes/property';
 
 dotenv.config();
 

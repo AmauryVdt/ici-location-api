@@ -1,6 +1,18 @@
 import { Request } from 'express';
 import { Propertie } from '@prisma/client';
 
+type PropertyByUserId = {
+    id: string;
+    title: string;
+    description: string;
+    price: {
+        price: number;
+    } | null;
+    images: {
+        url: string;
+    }[];
+}
+
 export async function createPropertieService({ prisma, body }: Request, userId: string): Promise<Propertie> {
 
     const {
@@ -37,7 +49,7 @@ export async function createPropertieService({ prisma, body }: Request, userId: 
         ges,
         price: {
             create: {
-                price: +price,
+                price: price,
             }
         },
         address: {
@@ -46,7 +58,7 @@ export async function createPropertieService({ prisma, body }: Request, userId: 
             }
         },
         images: {
-            create: images.map((image: string) => ({ url: image })),
+            create: images.map((image: string) => ({ url: image, })),
         },
     }
 
@@ -105,6 +117,7 @@ export async function createPropertieService({ prisma, body }: Request, userId: 
         },
     }
 
+    
     const data = {
         ...propertie,
         ...(type === 'house' && { houseDetail: specificities.houseDetail }),
@@ -115,4 +128,36 @@ export async function createPropertieService({ prisma, body }: Request, userId: 
     }
 
     return await prisma.propertie.create({ data });
+}
+
+export async function deletePropertieService({ prisma, params }: Request): Promise<void> {
+    const { id } = params;
+    await prisma.propertie.delete({
+        where: {
+            id,
+        },
+    });
+}
+
+export async function getPropertieByUserIdService({ prisma }: Request, userId: string): Promise<PropertyByUserId[]> {
+    return await prisma.propertie.findMany({
+            where: {
+                userId,
+            },
+            select: {
+                id: true,
+                title: true,
+                description: true,
+                price: {
+                    select: {
+                        price: true,
+                    },
+                },
+                images: {
+                    select: {
+                        url: true,
+                    },
+                },
+            },
+        });
 }

@@ -1,26 +1,24 @@
 import { Request, Response } from 'express';
-import { createPropertieService } from '../services/propertie';
+import { createPropertieService, getPropertieByUserIdService } from '../services/property';
 import { validationResult } from 'express-validator';
 
 export async function getAllProperties(req: Request, res: Response) {
     const { prisma } = req;
-    const { status, } = res;
     try {
         const properties = await prisma.propertie.findMany();
-        status(200).json(properties);
+        res.status(200).json(properties);
     } catch (error: any) {
-        status(500).send(error.message);
+        res.status(500).send(error.message);
     }
 }
 
 export async function createPropertie(req: Request, res: Response) {
     const { prisma, auth } = req;
-    const { status, } = res;
     const result = validationResult(req);
 
     if (!result.isEmpty()) {
-        // res.status(422).send('Bad request');
-        res.status(422).json({'Bad request': result.array()});
+        res.status(422).send('Bad request');
+        //res.status(422).json({'Bad request': result.array()});
         return;
     }
 
@@ -44,6 +42,27 @@ export async function createPropertie(req: Request, res: Response) {
     }
 }
 
+export async function getPropertieByUserId(req: Request, res: Response) {
+    const { prisma, auth } = req;
+
+    if (!auth.userId) {
+        res.status(401).send('Unauthorized');
+        return;
+    }
+    else {
+        if (!(await prisma.user.findUnique({ where: { id: auth.userId } }))) {
+            res.status(401).send('Unauthorized');
+            return;
+        }
+    }
+    try {
+        const properties = await getPropertieByUserIdService(req, auth.userId);
+        res.status(200).json(properties);
+    } catch (error: any) {
+        console.error(error);
+        res.status(500).send(error.message);
+    }
+}
 
 export async function getPropertieById({
     prisma, params
@@ -82,62 +101,36 @@ export async function udpatePropertie({
     }
 }
 
-export async function deletePropertie({
-    prisma, params
-}: Request, {
-    status,
-}: Response) {
+export async function deletePropertie(req: Request, res: Response) {
+    const { prisma, auth, params } = req;
     const { id } = params;
+    const result = validationResult(req);
+    console.log(id);
+
+    if (!result.isEmpty()) {
+        res.status(422).send('Bad request');
+        return;
+    }
+    if (!auth.userId) {
+        res.status(401).send('Unauthorized');
+        return;
+    }
+    else {
+        if (!(await prisma.user.findUnique({ where: { id: auth.userId } }))) {
+            res.status(401).send('Unauthorized');
+            return;
+        }
+    }
+
     try {
         await prisma.propertie.delete({
             where: {
                 id: id,
             },
         });
-        status(204).json();
+        res.status(204).json();
     } catch (error: any) {
-        status(500).send(error.message);
+        console.error(error);
+        res.status(500).send(error.message);
     }
 }
-
-// export async function findManyProperties(req: Request, res: Response) {
-
-//     const errors = validationResult(req);
-//     if (!errors.isEmpty()) {
-//         return res.status(400).json({ errors: errors.array() });
-//     }
-
-//     let whereCondition = {};
-//     Object.keys(req.query).forEach(key => {
-//         if (req.query[key]) {
-//             whereCondition[key] = req.query[key];
-//         }
-//     });
-
-//     try {
-//       const properties = await req.prisma.propertie.findMany({
-//         where: {
-//             id: id,
-//             title: title,
-//             description: description,    
-//             energyClass: energyClass,
-//             ges: ges,
-//             createdAt: createdAt,       
-//             images: images,
-//             addressId: addressId, 
-//             priceId: priceId,
-//             address: address,
-//             price: price,
-//             houseDetail: houseDetail,
-//             appartmentDetail: appartmentDetail,
-//             landDetail: landDetail,
-//             parkingDetail: parkingDetail,
-//             otherDetail: otherDetail,
-//             likes: likes,
-//         },
-//       });
-//       res.status(200).json(properties);
-//     } catch (error: any) {
-//       res.status(500).send(error.message);
-//     }
-// }
