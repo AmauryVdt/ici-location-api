@@ -22,7 +22,7 @@ export const presignedUrl = async (req: Request, res: Response) => {
   
     try {
       const url = await createPresignedUrl(bucket, `uploads/${filename}`);
-      res.status(201).json({ url });
+      res.status(201).json({ url, filename: `https://ici-location.s3.eu-west-3.amazonaws.com/uploads/${filename}` });
     } catch (error) {
       console.error(error);
       res.status(500).send('Erreur lors de la génération de l’URL pré-signée');
