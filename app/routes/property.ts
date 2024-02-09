@@ -11,6 +11,18 @@ const router = express.Router();
 
 router.get('/', propertieController.getAllProperties);
 
+router.get(
+  '/user',
+  ClerkExpressWithAuth(),
+  propertieController.getPropertieByUserId
+);
+
+router.get(
+  '/:id',
+  query('id').isString().trim().isUUID(),
+  propertieController.getPropertieById
+);
+
 router.post(
     '/',
     ClerkExpressWithAuth(),
@@ -37,14 +49,6 @@ router.post(
     propertieController.createPropertie
 );
 
-router.get(
-  '/user',
-  ClerkExpressWithAuth(),
-  propertieController.getPropertieByUserId
-  );
-
-router.get('/:id', propertieController.getPropertieById);
-
 router.put('/:id', propertieController.udpatePropertie);
 
 router.delete(
@@ -52,6 +56,6 @@ router.delete(
   ClerkExpressWithAuth(),
   param('id').isString().trim().isUUID(),
   propertieController.deletePropertie
-  );
+);
 
 export default router;

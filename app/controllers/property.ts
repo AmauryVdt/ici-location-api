@@ -1,6 +1,8 @@
 import { Request, Response } from 'express';
 import { createPropertieService, getPropertieByUserIdService } from '../services/property';
-import { validationResult } from 'express-validator';
+import { check, validationResult } from 'express-validator';
+import { clerkClient } from '@clerk/clerk-sdk-node';
+import checkUser from '../utils/checkUser';
 
 export async function getAllProperties(req: Request, res: Response) {
     const { prisma } = req;
@@ -12,50 +14,29 @@ export async function getAllProperties(req: Request, res: Response) {
     }
 }
 
-export async function createPropertie(req: Request, res: Response) {
-    const { prisma, auth } = req;
-    const result = validationResult(req);
+export async function getPropertieById(req: Request, res: Response) {
 
+    const { prisma } = req;
+    const { id } = req.query;
+    const result = validationResult(req);
+    
     if (!result.isEmpty()) {
         res.status(422).send('Bad request');
         //res.status(422).json({'Bad request': result.array()});
         return;
     }
 
-    if (!auth.userId) {
-        res.status(401).send('Unauthorized');
-        return;
-    }
-    else {
-        if (!(await prisma.user.findUnique({ where: { id: auth.userId } }))) {
-            res.status(401).send('Unauthorized');
-            return;
-        }
-    }
-
-    try {
-        const propertie = await createPropertieService(req, auth.userId)
-        res.status(201).json(propertie.id);
-    } catch (error: any) {
-        console.error(error);
-        res.status(500).send('An error occured');
-    }
-}
+};
 
 export async function getPropertieByUserId(req: Request, res: Response) {
     const { prisma, auth } = req;
 
-    if (!auth.userId) {
-        res.status(401).send('Unauthorized');
-        return;
-    }
-    else {
-        if (!(await prisma.user.findUnique({ where: { id: auth.userId } }))) {
+    try {
+        if (!auth.userId || !(await checkUser(req))) {
             res.status(401).send('Unauthorized');
             return;
         }
-    }
-    try {
+
         const properties = await getPropertieByUserIdService(req, auth.userId);
         res.status(200).json(properties);
     } catch (error: any) {
@@ -64,21 +45,27 @@ export async function getPropertieByUserId(req: Request, res: Response) {
     }
 }
 
-export async function getPropertieById({
-    prisma, params
-}: Request, {
-    status,
-}: Response) {
-    const { id } = params;
+export async function createPropertie(req: Request, res: Response) {
+    const { auth } = req;
+    const result = validationResult(req);
+
+    if (!result.isEmpty()) {
+        res.status(422).send('Bad request');
+        //res.status(422).json({'Bad request': result.array()});
+        return;
+    }
+
     try {
-        const propertie = await prisma.propertie.findUnique({
-            where: {
-                id: id,
-            },
-        });
-        status(200).json(propertie);
+        if (!auth.userId || !(await checkUser(req))) {
+            res.status(401).send('Unauthorized');
+            return;
+        }
+
+        const propertie = await createPropertieService(req, auth.userId)
+        res.status(201).json(propertie.id);
     } catch (error: any) {
-        status(500).send(error.message);
+        console.error(error);
+        res.status(500).send('An error occured');
     }
 }
 
@@ -111,18 +98,13 @@ export async function deletePropertie(req: Request, res: Response) {
         res.status(422).send('Bad request');
         return;
     }
-    if (!auth.userId) {
-        res.status(401).send('Unauthorized');
-        return;
-    }
-    else {
-        if (!(await prisma.user.findUnique({ where: { id: auth.userId } }))) {
+
+    try {
+        if (!auth.userId || !(await checkUser(req))) {
             res.status(401).send('Unauthorized');
             return;
         }
-    }
 
-    try {
         await prisma.propertie.delete({
             where: {
                 id: id,

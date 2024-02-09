@@ -22,7 +22,7 @@ app.use('/presigned-url', presignedUrl);
 app.use('/property', property);
 
 app.get('/', async (req: Request, res: Response) => {
-  res.send('Express + TypeScript Server + lol la voiture tu as compris mdr');
+  res.send('Express + TypeScript Server + lol la voiture tu as compris ?');
 });
 
 module.exports = app;

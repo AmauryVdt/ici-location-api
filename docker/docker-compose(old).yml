@@ -1,0 +1,19 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgis/postgis:16-3.4
+    container_name: postgres-icilocation
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: crampte
+      POSTGRES_USER: admin
+      POSTGRES_DB: icilocation
+    ports:
+        - "5432:5432"
+    volumes:
+      - ../postgres_data:/var/lib/postgresql/data
+
+# use 'docker compose up -d' to start the container
+
+# docker run --name db -e POSTGRES_PASSWORD=crampte -e POSTGRES_USER=admin -e POSTGRES_DB=icilocation -p 5432:5432 -v ./postgres_data:/var/lib/postgresql/data -d postgis/postgis:16-3.4

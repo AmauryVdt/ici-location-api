@@ -13,6 +13,29 @@ type PropertyByUserId = {
     }[];
 }
 
+export async function getAllPropertiesService({ prisma }: Request): Promise<Propertie[]> {
+    return await prisma.propertie.findMany();
+}
+
+export async function getPropertieByIdService({ prisma, params }: Request): Promise<Propertie | null> {
+    const { id } = params;
+    return await prisma.propertie.findUnique({
+        where: {
+            id,
+        },
+        include: {
+            price: true,
+            address: true,
+            images: true,
+            houseDetail: true,
+            apartmentDetail: true,
+            landDetail: true,
+            parkingDetail: true,
+            otherDetail: true,
+        },
+    });
+}
+
 export async function createPropertieService({ prisma, body }: Request, userId: string): Promise<Propertie> {
 
     const {
